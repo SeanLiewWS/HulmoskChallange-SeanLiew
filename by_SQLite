@@ -1,0 +1,92 @@
+patient_expenses:
+SELECT bi.c2, ba.c2 
+FROM bill_amount AS ba, bill_id AS bi
+WHERE ba.c1=bi.c1;
+
+patient_expenses_and_resident_status:
+SELECT pa.c1, pa.c2, d.c4 
+FROM patient_expenses AS pa, demographics AS d
+WHERE pa.c1=d.c1;
+
+Total_patient_and_total_expenses:
+SELECT COUNT(*) AS total_patients, SUM(c2) AS total_expenses
+FROM patient_expenses_and_resident_status;
+
+PR_expenses:
+SELECT COUNT(c1) AS count_of_PR, SUM(c2) AS total_expenses_of_PR, AVG(c2) AS average_expenses_of_PR
+FROM patient_expenses_and_resident_status
+WHERE c3 ='PR';
+
+Foreigner_expenses:
+SELECT COUNT(c1) AS count_of_foreigner, 
+SUM(c2) AS total_expenses_of_foreigner, 
+AVG(c2) AS average_expenses_of_foreigner
+FROM patient_expenses_and_resident_status
+WHERE c3 ='Foreigner';
+
+Singaporean_expenses:
+SELECT COUNT(c1) AS count_of_Singaporean, 
+SUM(c2) AS total_expenses_of_Singaporean, 
+AVG(c2) AS average_expenses_of_Singaporean
+FROM patient_expenses_and_resident_status
+WHERE c3 ='Singaporean' OR c3 = 'Singapore citizen';
+
+PatientAge:
+SELECT c1, (julianday('now') - julianday(c5))/365 AS age
+FROM demographics;
+
+PatientAge_Expenses_ResidentStatus:
+SELECT pa.c1 AS id, pa.c2 AS age, pers.c2 AS expenses, pers.c3 AS resident_status
+FROM patient_age AS pa, patient_expenses_and_resident_status AS pers
+WHERE pa.c1=pers.c1;
+
+TotalDay:
+SELECT c1,julianday(c3)-julianday(c2) AS day
+FROM clinical_data;
+
+TotalDay_Expenses:
+SELECT td.c1 AS id, td.c2 AS total_day, pers.c2 AS amount
+FROM TotalDays AS td, patient_expenses_and_resident_status AS pers
+WHERE td.c1=pers.c1
+ORDER BY td.c2 DESC;
+
+MedicalHistory:
+SELECT pers.c1 AS id, pers.c2 AS expenses, 
+cd.c4 AS MediHistory1, cd.c5 AS MediHistory2, 
+cd.c6 AS MediHistory3, cd.c7 AS MediHistory4, 
+cd.c8 AS MediHistory5, cd.c9 AS MediHistory6,
+cd.c10 AS MediHistory7
+FROM patient_expenses_and_resident_status AS pers, clinical_data AS cd
+WHERE pers.c1=cd.c1;
+
+AverageExpenses_TotalPatientswithMedicalHistory:
+SELECT COUNT(cd.c1) AS total_patients_with_MedicalHistory, AVG(pers.c2) AS average_expenses
+FROM patient_expenses_and_resident_status AS pers, clinical_data AS cd
+WHERE pers.c1=cd.c1 
+AND (cd.c4=1 OR cd.c5=1 OR cd.c6=1 OR cd.c7=1 OR cd.c8=1 OR cd.c9=1 OR cd.c10=1);
+
+AverageExpenses_TotalPatientswithoutMedicalHistory:
+SELECT COUNT(cd.c1) AS total_patients_without_MedicalHistory, AVG(pers.c2) AS average_expenses
+FROM patient_expenses_and_resident_status AS pers, clinical_data AS cd
+WHERE pers.c1=cd.c1 
+AND NOT (cd.c4=1 OR cd.c5=1 OR cd.c6=1 OR cd.c7=1 OR cd.c8=1 OR cd.c9=1 OR cd.c10=1);
+
+PreOpMedication:
+SELECT pers.c1 AS id, pers.c2 AS expenses, 
+cd.c11 as PreOpMedication1, cd.c12 as PreOpMedication2, 
+cd.c13 as PreOpMedication3, cd.c14 as PreOpMedication4,
+cd.c15 as PreOpMedication5, cd.c16 as PreOpMedication6
+FROM patient_expenses_and_resident_status AS pers, clinical_data AS cd
+WHERE pers.c1=cd.c1;
+
+AverageExpenses_TotalPatientswithPreOpMedi:
+SELECT COUNT(cd.c1) AS total_patients_with_PreOpMedication, AVG(pers.c2) AS average_expenses
+FROM patient_expenses_and_resident_status AS pers, clinical_data AS cd
+WHERE pers.c1=cd.c1 
+AND (cd.c11=1 OR cd.c12=1 OR cd.c13=1 OR cd.c14=1 OR cd.c15=1 OR cd.c16=1);
+
+AverageExpenses_TotalPatientswithoutPreOpMedi:
+SELECT COUNT(cd.c1) AS total_patients_without_PreOpMedication, AVG(pers.c2) AS average_expenses
+FROM patient_expenses_and_resident_status AS pers, clinical_data AS cd
+WHERE pers.c1=cd.c1 
+AND NOT(cd.c11=1 OR cd.c12=1 OR cd.c13=1 OR cd.c14=1 OR cd.c15=1 OR cd.c16=1);
